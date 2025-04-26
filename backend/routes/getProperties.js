@@ -11,8 +11,8 @@ router.get('/',(req,res,next)=>{
             res.status(200).json({
                 status:"success",
                 properties:propertiesResults.map((obj)=>({
-                    latitude: obj.LATITUDE,
-                    longitude: obj.LONGITUDE,
+                    latitude: parseFloat(obj.LATITUDE),
+                    longitude: parseFloat(obj.LONGITUDE),
                     propertyAddress: obj.PROPERTY_ADDRESS,
                     city: obj.CITY,
                     state: obj.STATE,

@@ -1,7 +1,7 @@
-import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api'; //document  ===>   https://react-google-maps-api-docs.netlify.app/#googlemap
 
 let properties=[]
 let maxChartData=0
@@ -17,6 +17,10 @@ function App() {
   const [chartData,setChartData] = useState([])
   const [pickedDecade,setPickedDecade] = useState(null)
   const [loading,setLoading] = useState(false)
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: undefined
+  })
   const load = async ()=>{
     await axios({
       url:'http://localhost:3002/getProperties',
@@ -254,6 +258,37 @@ function App() {
         </div>
       </div>
       <div style={styles.map}>
+        {isLoaded && <GoogleMap
+          mapContainerStyle={{width: '100%',height: '100%'}}
+          center={{lat:39.82874138954248, lng:-98.57956553069293}}
+          zoom={3}
+          options={{
+            styles: [
+              {
+                featureType: 'poi',
+                stylers: [{ visibility: 'off' }],
+              },
+              {
+                featureType: 'transit',
+                stylers: [{ visibility: 'off' }],
+              },
+              {
+                featureType: 'landscape',
+                stylers: [{ visibility: 'off' }],
+              }
+            ],
+            mapTypeControl: false,
+            fullscreenControl: false,
+            streetViewControl: false
+          }}
+        >
+          <MarkerF
+            icon={{
+              url: "https://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+            }}
+            position={property?{lat:property.latitude, lng:property.longitude}:null}
+          />
+        </GoogleMap>}
       </div>
       {property && <div style={styles.column}>
         <div style={styles.property}>
@@ -302,7 +337,7 @@ function App() {
                 <td style={styles.cell}>{censusData[1][index]}</td>
             </tr>
           ))}
-          {Math.min(censusData[0].length,censusData[1].length)==0 && <tr><td style={{textAlign:'center', height:'1in'}}>{`Census data ${loading?'loading...':'unavailable'}`}</td></tr>}
+          {Math.min(censusData[0].length,censusData[1].length)===0 && <tr><td style={{textAlign:'center', height:'1in'}}>{`Census data ${loading?'loading...':'unavailable'}`}</td></tr>}
         </table>
       </div>}
     </div>
