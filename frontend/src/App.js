@@ -6,6 +6,7 @@ import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api'; //d
 let properties=[]
 let maxChartData=0
 function App() {
+  //////////////////////////////////////////// FOR MOBILE RESPONSIVE ///////////////////////////////////////////////////
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   useEffect(() => {
     const handleResize = () => {
@@ -19,6 +20,7 @@ function App() {
     };
   }, []);
 
+  //////////////////////////////////////////// USE STATE PARAMETERS ///////////////////////////////////////////////////
   const [propertiesDisplay,setPropertiesDisplay] = useState([]);
   const [property,setProperty] = useState(null);
   const [newOccupiedSpaceCount,setNewOccupiedSpaceCount] = useState(null);
@@ -34,6 +36,8 @@ function App() {
     id: 'google-map-script',
     googleMapsApiKey: undefined
   })
+
+  //////////////////////////////////////////////////// FUNCTIONS //////////////////////////////////////////////////////
   const load = async ()=>{
     await axios({
       url:'http://localhost:3002/getProperties',
@@ -109,6 +113,8 @@ function App() {
       setLoading(false)
     })
   }
+
+  //////////////////////////////////////////////////// STYLING //////////////////////////////////////////////////////
   const styles={
     page:{
       width: '100vw',
