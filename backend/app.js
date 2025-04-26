@@ -16,6 +16,8 @@ const getProperties = require("./routes/getProperties")
 app.use('/getProperties',getProperties)
 const updateProperty = require("./routes/updateProperty")
 app.use('/updateProperty',updateProperty)
+const getPropertyCensus = require("./routes/getPropertyCensus")
+app.use('/getPropertyCensus',getPropertyCensus)
 
 
 

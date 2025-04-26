@@ -6,7 +6,7 @@ const router=express.Router()
 router.get('/',(req,res,next)=>{
     db.query('SELECT * FROM ESSEX.PROPERTIES;', (propertiesErr, propertiesResults, propertiesField) => {
         if (propertiesErr){
-            res.status(500)
+            res.status(500).send()
         }else{
             res.status(200).json({
                 status:"success",

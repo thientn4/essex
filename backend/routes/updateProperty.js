@@ -34,7 +34,7 @@ router.post('/',(req,res,next)=>{
     ]
     , (updateErr, updateResults, updateField) => {
         if (updateErr){
-            res.status(500)
+            res.status(500).send()
         }else{
             res.status(200).json({
                 status:"success"
