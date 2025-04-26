@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 
 let properties=[]
+let maxChartData=0
 function App() {
   const [propertiesDisplay,setPropertiesDisplay] = useState([]);
   const [property,setProperty] = useState(null);
@@ -13,6 +14,8 @@ function App() {
   const [newEvCharger,setNewEvCharger] = useState(null);
   const [newRedevelopmentOpportunities,setNewRedevelopmentOpportunities] = useState(null);
   const [censusData,setCensusData] = useState([[],[]]);
+  const [chartData,setChartData] = useState([])
+  const [pickedDecade,setPickedDecade] = useState(null)
   const load = async ()=>{
     await axios({
       url:'http://localhost:3002/getProperties',
@@ -24,21 +27,15 @@ function App() {
     }).then((response)=>{
       if(response.data.status==='success'){
         properties=response.data.properties
-        // deliveries.sort((a,b)=>{
-        //   const a_score=
-        //     (a.phoneNum?1:0)+
-        //     (a.acceptTime?1:0)+
-        //     (a.podTime?1:0)
-        //   const b_score=
-        //     (b.phoneNum?1:0)+
-        //     (b.acceptTime?1:0)+
-        //     (b.podTime?1:0)
-        //   return a_score-b_score
-        // })
         setPropertiesDisplay(properties)
-        // filtered=deliveries
-        // setQuery("")
-        // window.scrollTo({ top: 0 });
+        let decades={}
+        properties.map((property)=>{
+          let decade=Math.floor(property.yearBuilt/10)*10
+          if(!decades[decade])decades[decade]=0
+          decades[decade]+=1
+          maxChartData=Math.max(maxChartData,decades[decade])
+        })
+        setChartData(Object.keys(decades).map((decade)=>([parseInt(decade),decades[decade]])).sort((decade)=>(decade[0])))
       }else{
         alert("Error loading properties")
       }
@@ -109,6 +106,7 @@ function App() {
       flexDirection:'column'
     },
     search:{
+      padding:'0.04in',
       margin:'0.08in',
       borderRadius:'0.05in',
       border: 0,
@@ -149,8 +147,8 @@ function App() {
       boxSizing:'border-box',
       height:'1in'
     },
-    button:{
-      backgroundColor:'green',
+    updateBtn:{
+      backgroundColor:'rgb(57, 98, 155)',
       color:'white',
       borderRadius:'0.05in',
       border: 0,
@@ -172,6 +170,26 @@ function App() {
       paddingLeft:'0.08in',
       paddingRight:'0.08in',
       border: '1px solid grey'
+    },
+    chart:{
+      height:'2in',
+      display:'flex',
+      flexDirection:'row',
+      overflowX:'auto',
+      paddingTop:'0.1in',
+      backgroundColor:'rgb(169,169,169)'
+    },
+    resetBtn:{
+      backgroundColor:'rgb(57, 98, 155)',
+      color:'white',
+      padding:'0.04in',
+      margin:'0.08in',
+      borderRadius:'0.05in',
+      border: 0,
+      outline: 'none',
+      fontSize:'0.2in',
+      textAlign:'center',
+      userSelect:'none'
     }
   }
   useEffect(() => {
@@ -180,7 +198,18 @@ function App() {
   return (
     <div style={styles.page}>
       <div style={styles.column}>
-        <input
+        <div style={styles.properties}>
+          {propertiesDisplay.map((property,index)=>(
+            <div key={index} style={styles.property} onClick={()=>{
+              setProperty(property)
+              getCensus(property)
+            }}>
+              <b>{`(${property.yearBuilt}) `}</b>
+              {`${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`}
+            </div>
+          ))}
+        </div>
+        {!pickedDecade && <input
           style={styles.search}
           placeholder="search"
           onChange={(e)=>{
@@ -193,17 +222,29 @@ function App() {
               setPropertiesDisplay(properties)
             }
           }}
-        />
-        <div style={styles.properties}>
-          {propertiesDisplay.map((property,index)=>(
-            <div key={index} style={styles.property} onClick={()=>{
-              setProperty(property)
-              getCensus(property)
+        />}
+        {pickedDecade && <div style={styles.resetBtn} onClick={()=>{
+          setPropertiesDisplay(properties)
+          setPickedDecade(null)
+        }}>
+          Reset filter
+        </div>}
+        <div style={styles.chart}>
+          {chartData.map((decade)=>{
+          return (
+            <div style={{height:'100%',display:'flex',flexDirection:'column',marginLeft:'0.1in', userSelect:'none'}} onClick={()=>{
+              setPickedDecade(decade[0])
+              setPropertiesDisplay(properties.filter((property)=>
+                (decade[0]<=property.yearBuilt && property.yearBuilt<decade[0]+9)
+              ))
             }}>
-              <b>{`(${property.yearBuilt}) `}</b>
-              {`${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`}
+              <div style={{flex:1}}></div>
+              <div style={{color:'white', textAlign:'center'}}>{decade[1]}</div>
+              <div style={{backgroundColor:decade[0]===pickedDecade?'rgb(57, 98, 155)':'rgb(239, 239, 77)',height:`${decade[1]/maxChartData*100}%`}}></div>
+              <div style={{color:'white'}}>{decade[0]}</div>
             </div>
-          ))}
+          )})}
+          <div style={{marginLeft:'0.1in'}}></div>
         </div>
       </div>
       <div style={styles.map}>
@@ -233,7 +274,7 @@ function App() {
           <textarea style={styles.textArea} placeholder={property.redevelopmentOpportunities} onChange={(e)=>{setNewRedevelopmentOpportunities(e.target.value)}} value={newRedevelopmentOpportunities}></textarea>
           {
             (newOccupiedSpaceCount || newTotalSpaceCount || newParking || newEvCharger || newRedevelopmentOpportunities)
-            && <div style={styles.button} onClick={()=>{update({
+            && <div style={styles.updateBtn} onClick={()=>{update({
               occupiedSpaceCount: parseInt(newOccupiedSpaceCount)||property.occupiedSpaceCount,
               totalSpaceCount: parseInt(newTotalSpaceCount)||property.totalSpaceCount,
               parking: parseInt(newParking)||property.parking,
