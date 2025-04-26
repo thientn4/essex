@@ -6,8 +6,8 @@
 # Demo video:
 This video demos core requirements for the application as requested, each requirement is demoed in the bullet-point order below:
 - Displays all core property information (from PROPERTY_LIST.csv) + additional property metadata (occupancy rate, number of parking lots, EV charger availability, redevelopment opportunities).
-- Allows the Asset Management team to input their additional property metadata.
 - Allows users to select a property and fetches and displays 2023 US Census occupancy data
+- Allows the Asset Management team to input their additional property metadata.
 - Add a chart that shows years built by decade. Hook up some chart interactivity – for example, clicking on your chart filters the properties in view.
 - At least one idea of your own that you think would be helpful for users:
   - Search feature to search for properties based on their address and year built
