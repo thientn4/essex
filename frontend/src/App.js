@@ -38,7 +38,7 @@ function App() {
   })
 
   //////////////////////////////////////////////////// FUNCTIONS //////////////////////////////////////////////////////
-  const load = async ()=>{
+  const load = async ()=>{ //-----------------> Load all properties when page is opened
     await axios({
       url:'http://localhost:3002/getProperties',
       method:'GET',
@@ -65,7 +65,7 @@ function App() {
       alert("Error loading properties")
     })
   }
-  const update = async (inProperty)=>{
+  const update = async (inProperty)=>{ //-----------------> To update information of a chosen property
     if(inProperty.occupiedSpaceCount>inProperty.totalSpaceCount){
       alert("Invalid occupancy rate")
       return
@@ -95,7 +95,7 @@ function App() {
       alert("Error updating property")
     })
   }
-  const getCensus = async (inProperty)=>{
+  const getCensus = async (inProperty)=>{ //---------------------> To get Census data from external API of a chosen property
     setLoading(true)
     setCensusData([[],[]])
     await axios({
@@ -236,7 +236,7 @@ function App() {
       textAlign:'center',
     }
   }
-  useEffect(() => {
+  useEffect(() => { //-----------------> Load all properties when page is opened
     load()
   }, []);
   return (
@@ -245,7 +245,7 @@ function App() {
         <div style={styles.properties}>
           {propertiesDisplay.map((property,index)=>(
             <div key={index} style={styles.property} onClick={()=>{
-              setProperty(property)
+              setProperty(property)  //-----------------> Pick a property from all properties and get its Census data from external API
               getCensus(property)
             }}>
               <b>{`(${property.yearBuilt}) `}</b>
@@ -257,7 +257,7 @@ function App() {
           style={styles.search}
           placeholder="search"
           onChange={(e)=>{
-            if(e.target.value.length>0){
+            if(e.target.value.length>0){  //-----------------> Search for properties based on their address and year built
               setPropertiesDisplay(properties.filter((property)=>
                 (`(${property.yearBuilt}) ${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`)
                 .toLowerCase().includes(e.target.value.toLowerCase())
@@ -274,10 +274,9 @@ function App() {
           Reset filter
         </div>}
         <div style={styles.chart}>
-          {chartData.map((decade)=>{
-          return (
+          {chartData.map((decade)=>(   //-----------------> Chart to display summary of properties data based on year built and group them into decades
             <div style={{height:'100%',display:'flex',flexDirection:'column',marginLeft:'0.1in', userSelect:'none',color:'white'}} onClick={()=>{
-              setPickedDecade(decade[0])
+              setPickedDecade(decade[0])   //-----------------> Filter properties based on year built decade
               setPropertiesDisplay(properties.filter((property)=>
                 (Math.floor(property.yearBuilt/10) === Math.floor(decade[0]/10))
               ))
@@ -288,7 +287,7 @@ function App() {
               </div>
               <div>{decade[0]}</div>
             </div>
-          )})}
+          ))}
           <div style={{marginLeft:'0.1in'}}></div>
         </div>
       </div>}
@@ -354,7 +353,7 @@ function App() {
             <textarea style={styles.textArea} placeholder={property.redevelopmentOpportunities} onChange={(e)=>{setNewRedevelopmentOpportunities(e.target.value)}} value={newRedevelopmentOpportunities}></textarea>
             {
               (newOccupiedSpaceCount || newTotalSpaceCount || newParking || newEvCharger || newRedevelopmentOpportunities)
-              && <div style={styles.updateBtn} onClick={()=>{update({
+              && <div style={styles.updateBtn} onClick={()=>{update({  //-----------------> Button to update information of a chosen property
                 occupiedSpaceCount: parseInt(newOccupiedSpaceCount)||property.occupiedSpaceCount,
                 totalSpaceCount: parseInt(newTotalSpaceCount)||property.totalSpaceCount,
                 parking: parseInt(newParking)||property.parking,
