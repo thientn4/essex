@@ -16,6 +16,7 @@ function App() {
   const [censusData,setCensusData] = useState([[],[]]);
   const [chartData,setChartData] = useState([])
   const [pickedDecade,setPickedDecade] = useState(null)
+  const [loading,setLoading] = useState(false)
   const load = async ()=>{
     await axios({
       url:'http://localhost:3002/getProperties',
@@ -74,6 +75,8 @@ function App() {
     })
   }
   const getCensus = async (inProperty)=>{
+    setLoading(true)
+    setCensusData([[],[]])
     await axios({
       url:`http://localhost:3002/getPropertyCensus?street=${inProperty.propertyAddress}&city=${inProperty.city}&state=${inProperty.state}`,
       method:'GET',
@@ -83,8 +86,10 @@ function App() {
       },
     }).then((response)=>{
       setCensusData(response.data.census)
+      setLoading(false)
     }).catch((error)=>{
       alert("Error getting Census data")
+      setLoading(false)
     })
   }
   const styles={
@@ -232,16 +237,17 @@ function App() {
         <div style={styles.chart}>
           {chartData.map((decade)=>{
           return (
-            <div style={{height:'100%',display:'flex',flexDirection:'column',marginLeft:'0.1in', userSelect:'none'}} onClick={()=>{
+            <div style={{height:'100%',display:'flex',flexDirection:'column',marginLeft:'0.1in', userSelect:'none',color:'white'}} onClick={()=>{
               setPickedDecade(decade[0])
               setPropertiesDisplay(properties.filter((property)=>
                 (decade[0]<=property.yearBuilt && property.yearBuilt<decade[0]+9)
               ))
             }}>
-              <div style={{flex:1}}></div>
-              <div style={{color:'white', textAlign:'center'}}>{decade[1]}</div>
-              <div style={{backgroundColor:decade[0]===pickedDecade?'rgb(57, 98, 155)':'rgb(239, 239, 77)',height:`${decade[1]/maxChartData*100}%`}}></div>
-              <div style={{color:'white'}}>{decade[0]}</div>
+              <div style={{height:'100%',display:'flex',flexDirection:'column'}}>
+                <div style={{flex:1,textAlign:'center',display:'flex',flexDirection:'column', justifyContent:'flex-end'}}>{decade[1]}</div>
+                <div style={{backgroundColor:decade[0]===pickedDecade?'rgb(57, 98, 155)':'rgb(239, 239, 77)',height:`${decade[1]/maxChartData*100}%`}}></div>
+              </div>
+              <div>{decade[0]}</div>
             </div>
           )})}
           <div style={{marginLeft:'0.1in'}}></div>
@@ -296,7 +302,7 @@ function App() {
                 <td style={styles.cell}>{censusData[1][index]}</td>
             </tr>
           ))}
-          {Math.min(censusData[0].length,censusData[1].length)==0 && <tr><td style={{textAlign:'center', height:'1in'}}>Census data unavailable</td></tr>}
+          {Math.min(censusData[0].length,censusData[1].length)==0 && <tr><td style={{textAlign:'center', height:'1in'}}>{`Census data ${loading?'loading...':'unavailable'}`}</td></tr>}
         </table>
       </div>}
     </div>
