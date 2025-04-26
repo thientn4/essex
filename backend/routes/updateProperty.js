@@ -4,10 +4,12 @@ const db=require('../db')
 const router=express.Router()
 
 router.post('/',(req,res,next)=>{
+    if (req.body.occupiedSpaceCount>req.body.totalSpaceCount) return res.status(500).send()
     db.query(`
         UPDATE ESSEX.PROPERTIES
         SET 
-            OCCUPANCY_RATE = COALESCE(?,OCCUPANCY_RATE), 
+            OCCUPIED_SPACE_COUNT = COALESCE(?,OCCUPIED_SPACE_COUNT), 
+            TOTAL_SPACE_COUNT = COALESCE(?,TOTAL_SPACE_COUNT), 
             PARKING = COALESCE(?,PARKING), 
             EV_CHARGER = COALESCE(?,EV_CHARGER), 
             REDEVELOPMENT_OPPORTUNITIES = COALESCE(?,REDEVELOPMENT_OPPORTUNITIES)
@@ -19,7 +21,8 @@ router.post('/',(req,res,next)=>{
             AND COUNTY = ?;
     `
     , [
-        req.body.occupancyRate,
+        req.body.occupiedSpaceCount,
+        req.body.totalSpaceCount,
         req.body.parking,
         req.body.evCharger,
         req.body.redevelopmentOpportunities,

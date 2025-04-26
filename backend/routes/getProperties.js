@@ -19,7 +19,8 @@ router.get('/',(req,res,next)=>{
                     zip: obj.ZIP,
                     county: obj.COUNTY,
                     yearBuilt: obj.YEAR_BUILT,
-                    occupancyRate: obj.OCCUPANCY_RATE,
+                    occupiedSpaceCount: obj.OCCUPIED_SPACE_COUNT,
+                    totalSpaceCount: obj.TOTAL_SPACE_COUNT,
                     parking: obj.PARKING,
                     evCharger: obj.EV_CHARGER,
                     redevelopmentOpportunities: obj.REDEVELOPMENT_OPPORTUNITIES
