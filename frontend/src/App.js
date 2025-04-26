@@ -12,6 +12,7 @@ function App() {
   const [newParking,setNewParking] = useState(null);
   const [newEvCharger,setNewEvCharger] = useState(null);
   const [newRedevelopmentOpportunities,setNewRedevelopmentOpportunities] = useState(null);
+  const [censusData,setCensusData] = useState([[],[]]);
   const load = async ()=>{
     await axios({
       url:'http://localhost:3002/getProperties',
@@ -75,6 +76,20 @@ function App() {
       alert("Error updating property")
     })
   }
+  const getCensus = async (inProperty)=>{
+    await axios({
+      url:`http://localhost:3002/getPropertyCensus?street=${inProperty.propertyAddress}&city=${inProperty.city}&state=${inProperty.state}`,
+      method:'GET',
+      timeout: 20000,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then((response)=>{
+      setCensusData(response.data.census)
+    }).catch((error)=>{
+      alert("Error getting Census data")
+    })
+  }
   const styles={
     page:{
       width: '100vw',
@@ -86,6 +101,7 @@ function App() {
       flex:1
     },
     column:{
+      overflowY: 'auto',
       width:'3in',
       height:'100%',
       backgroundColor:'grey',
@@ -143,6 +159,19 @@ function App() {
       outline: 'none',
       fontSize:'0.2in',
       textAlign:'center',
+    },
+    table:{
+      borderRadius:'0.05in',
+      backgroundColor:'white',
+      margin:'0.08in',
+      marginTop:0,
+      tableLayout:'fixed',
+      flex:1
+    },
+    cell:{
+      paddingLeft:'0.08in',
+      paddingRight:'0.08in',
+      border: '1px solid grey'
     }
   }
   useEffect(() => {
@@ -167,7 +196,10 @@ function App() {
         />
         <div style={styles.properties}>
           {propertiesDisplay.map((property,index)=>(
-            <div style={styles.property} onClick={()=>{setProperty(property)}}>
+            <div key={index} style={styles.property} onClick={()=>{
+              setProperty(property)
+              getCensus(property)
+            }}>
               <b>{`(${property.yearBuilt}) `}</b>
               {`${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`}
             </div>
@@ -177,47 +209,54 @@ function App() {
       <div style={styles.map}>
       </div>
       {property && <div style={styles.column}>
-          <div style={styles.property}>
-            <b>{`(${property.yearBuilt}) `}</b>
-            {`${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`}
-            <div style={{width:'100%'}}>
-              <div style={styles.inputRow}>
-                Occupied:
-                <div style={styles.occupancyRate}>
-                  <input style={styles.input} placeholder={property.occupiedSpaceCount||0} onChange={(e)=>{setNewOccupiedSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newOccupiedSpaceCount}/>
-                  <div>&nbsp;/&nbsp;</div>
-                  <input style={styles.input} placeholder={property.totalSpaceCount||0} onChange={(e)=>{setNewTotalSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newTotalSpaceCount}/>
-                </div>
-              </div>
-              <div style={styles.inputRow}>
-                # Parking:
-                <input style={styles.input} placeholder={property.parking||0} onChange={(e)=>{setNewParking(e.target.value.replace(/[^0-9]/g, ""))}} value={newParking}/>
-              </div>
-              <div style={styles.inputRow}>
-                # EV charger:
-                <input style={styles.input} placeholder={property.evCharger||0} onChange={(e)=>{setNewEvCharger(e.target.value.replace(/[^0-9]/g, ""))}} value={newEvCharger}/>
-              </div>
-              <div style={styles.inputRow}></div>
-              Redevelopment opportunities:
-              <textarea style={styles.textArea} placeholder={property.redevelopmentOpportunities} onChange={(e)=>{setNewRedevelopmentOpportunities(e.target.value)}} value={newRedevelopmentOpportunities}></textarea>
-              {
-                (newOccupiedSpaceCount || newTotalSpaceCount || newParking || newEvCharger || newRedevelopmentOpportunities)
-                && <div style={styles.button} onClick={()=>{update({
-                  occupiedSpaceCount: parseInt(newOccupiedSpaceCount)||property.occupiedSpaceCount,
-                  totalSpaceCount: parseInt(newTotalSpaceCount)||property.totalSpaceCount,
-                  parking: parseInt(newParking)||property.parking,
-                  evCharger: parseInt(newEvCharger)||property.evCharger,
-                  redevelopmentOpportunities: newRedevelopmentOpportunities||property.redevelopmentOpportunities,
-                  propertyAddress: property.propertyAddress,
-                  city: property.city,
-                  state: property.state,
-                  zip: property.zip,
-                  county: property.county,
-                  yearBuilt:property.yearBuilt
-                })}}>Update</div>
-              }
+        <div style={styles.property}>
+          <b>{`(${property.yearBuilt}) `}</b>
+          {`${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`}
+          <div style={styles.inputRow}>
+            Occupied:
+            <div style={styles.occupancyRate}>
+              <input style={styles.input} placeholder={property.occupiedSpaceCount||0} onChange={(e)=>{setNewOccupiedSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newOccupiedSpaceCount}/>
+              <div>&nbsp;/&nbsp;</div>
+              <input style={styles.input} placeholder={property.totalSpaceCount||0} onChange={(e)=>{setNewTotalSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newTotalSpaceCount}/>
             </div>
           </div>
+          <div style={styles.inputRow}>
+            # Parking:
+            <input style={styles.input} placeholder={property.parking||0} onChange={(e)=>{setNewParking(e.target.value.replace(/[^0-9]/g, ""))}} value={newParking}/>
+          </div>
+          <div style={styles.inputRow}>
+            # EV charger:
+            <input style={styles.input} placeholder={property.evCharger||0} onChange={(e)=>{setNewEvCharger(e.target.value.replace(/[^0-9]/g, ""))}} value={newEvCharger}/>
+          </div>
+          <div style={styles.inputRow}></div>
+          Redevelopment opportunities:
+          <textarea style={styles.textArea} placeholder={property.redevelopmentOpportunities} onChange={(e)=>{setNewRedevelopmentOpportunities(e.target.value)}} value={newRedevelopmentOpportunities}></textarea>
+          {
+            (newOccupiedSpaceCount || newTotalSpaceCount || newParking || newEvCharger || newRedevelopmentOpportunities)
+            && <div style={styles.button} onClick={()=>{update({
+              occupiedSpaceCount: parseInt(newOccupiedSpaceCount)||property.occupiedSpaceCount,
+              totalSpaceCount: parseInt(newTotalSpaceCount)||property.totalSpaceCount,
+              parking: parseInt(newParking)||property.parking,
+              evCharger: parseInt(newEvCharger)||property.evCharger,
+              redevelopmentOpportunities: newRedevelopmentOpportunities||property.redevelopmentOpportunities,
+              propertyAddress: property.propertyAddress,
+              city: property.city,
+              state: property.state,
+              zip: property.zip,
+              county: property.county,
+              yearBuilt:property.yearBuilt
+            })}}>Update</div>
+          }
+        </div>
+        <table style={styles.table}>
+          {Array(Math.min(censusData[0].length,censusData[1].length)).fill(0).map((i,index)=>(
+            <tr key={index}>
+                <th style={styles.cell}>{censusData[0][index]}</th>
+                <td style={styles.cell}>{censusData[1][index]}</td>
+            </tr>
+          ))}
+          {Math.min(censusData[0].length,censusData[1].length)==0 && <tr><td style={{textAlign:'center', height:'1in'}}>Census data unavailable</td></tr>}
+        </table>
       </div>}
     </div>
   );
