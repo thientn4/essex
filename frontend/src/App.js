@@ -6,6 +6,19 @@ import { GoogleMap, MarkerF, useJsApiLoader } from '@react-google-maps/api'; //d
 let properties=[]
 let maxChartData=0
 function App() {
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   const [propertiesDisplay,setPropertiesDisplay] = useState([]);
   const [property,setProperty] = useState(null);
   const [newOccupiedSpaceCount,setNewOccupiedSpaceCount] = useState(null);
@@ -103,12 +116,9 @@ function App() {
       display:'flex',
       flexDirection:'row'
     },
-    map:{
-      flex:1
-    },
     column:{
       overflowY: 'auto',
-      width:'3in',
+      width:windowWidth<700?'100%':'3in',
       height:'100%',
       backgroundColor:'grey',
       display:'flex',
@@ -127,6 +137,14 @@ function App() {
       flex:1,
       overflowY: 'auto',
       backgroundColor: 'rgb(169,169,169)'
+    },
+    mapProperty:{
+      flex:1,
+      display:'flex',
+      flexDirection:windowWidth<700?'column':'row'
+    },
+    map:{
+      flex:1
     },
     property:{
       borderRadius:'0.05in',
@@ -199,6 +217,17 @@ function App() {
       fontSize:'0.2in',
       textAlign:'center',
       userSelect:'none'
+    },
+    backMobileBtn:{
+      backgroundColor:'rgb(57, 98, 155)',
+      color:'white',
+      borderRadius:'0.05in',
+      border: 0,
+      marginBottom:'0.1in', 
+      padding:'0.04in',
+      outline: 'none',
+      fontSize:'0.2in',
+      textAlign:'center',
     }
   }
   useEffect(() => {
@@ -206,7 +235,7 @@ function App() {
   }, []);
   return (
     <div style={styles.page}>
-      <div style={styles.column}>
+      {(!property || windowWidth>=700) && <div style={styles.column}>
         <div style={styles.properties}>
           {propertiesDisplay.map((property,index)=>(
             <div key={index} style={styles.property} onClick={()=>{
@@ -256,90 +285,95 @@ function App() {
           )})}
           <div style={{marginLeft:'0.1in'}}></div>
         </div>
-      </div>
-      <div style={styles.map}>
-        {isLoaded && <GoogleMap
-          mapContainerStyle={{width: '100%',height: '100%'}}
-          center={{lat:39.82874138954248, lng:-98.57956553069293}}
-          zoom={3}
-          options={{
-            styles: [
-              {
-                featureType: 'poi',
-                stylers: [{ visibility: 'off' }],
-              },
-              {
-                featureType: 'transit',
-                stylers: [{ visibility: 'off' }],
-              },
-              {
-                featureType: 'landscape',
-                stylers: [{ visibility: 'off' }],
-              }
-            ],
-            mapTypeControl: false,
-            fullscreenControl: false,
-            streetViewControl: false
-          }}
-        >
-          <MarkerF
-            icon={{
-              url: "https://maps.google.com/mapfiles/ms/icons/orange-dot.png"
-            }}
-            position={property?{lat:property.latitude, lng:property.longitude}:null}
-          />
-        </GoogleMap>}
-      </div>
-      {property && <div style={styles.column}>
-        <div style={styles.property}>
-          <b>{`(${property.yearBuilt}) `}</b>
-          {`${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`}
-          <div style={styles.inputRow}>
-            Occupied:
-            <div style={styles.occupancyRate}>
-              <input style={styles.input} placeholder={property.occupiedSpaceCount||0} onChange={(e)=>{setNewOccupiedSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newOccupiedSpaceCount}/>
-              <div>&nbsp;/&nbsp;</div>
-              <input style={styles.input} placeholder={property.totalSpaceCount||0} onChange={(e)=>{setNewTotalSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newTotalSpaceCount}/>
-            </div>
-          </div>
-          <div style={styles.inputRow}>
-            # Parking:
-            <input style={styles.input} placeholder={property.parking||0} onChange={(e)=>{setNewParking(e.target.value.replace(/[^0-9]/g, ""))}} value={newParking}/>
-          </div>
-          <div style={styles.inputRow}>
-            # EV charger:
-            <input style={styles.input} placeholder={property.evCharger||0} onChange={(e)=>{setNewEvCharger(e.target.value.replace(/[^0-9]/g, ""))}} value={newEvCharger}/>
-          </div>
-          <div style={styles.inputRow}></div>
-          Redevelopment opportunities:
-          <textarea style={styles.textArea} placeholder={property.redevelopmentOpportunities} onChange={(e)=>{setNewRedevelopmentOpportunities(e.target.value)}} value={newRedevelopmentOpportunities}></textarea>
-          {
-            (newOccupiedSpaceCount || newTotalSpaceCount || newParking || newEvCharger || newRedevelopmentOpportunities)
-            && <div style={styles.updateBtn} onClick={()=>{update({
-              occupiedSpaceCount: parseInt(newOccupiedSpaceCount)||property.occupiedSpaceCount,
-              totalSpaceCount: parseInt(newTotalSpaceCount)||property.totalSpaceCount,
-              parking: parseInt(newParking)||property.parking,
-              evCharger: parseInt(newEvCharger)||property.evCharger,
-              redevelopmentOpportunities: newRedevelopmentOpportunities||property.redevelopmentOpportunities,
-              propertyAddress: property.propertyAddress,
-              city: property.city,
-              state: property.state,
-              zip: property.zip,
-              county: property.county,
-              yearBuilt:property.yearBuilt
-            })}}>Update</div>
-          }
-        </div>
-        <table style={styles.table}>
-          {Array(Math.min(censusData[0].length,censusData[1].length)).fill(0).map((i,index)=>(
-            <tr key={index}>
-                <th style={styles.cell}>{censusData[0][index]}</th>
-                <td style={styles.cell}>{censusData[1][index]}</td>
-            </tr>
-          ))}
-          {Math.min(censusData[0].length,censusData[1].length)===0 && <tr><td style={{textAlign:'center', height:'1in'}}>{`Census data ${loading?'loading...':'unavailable'}`}</td></tr>}
-        </table>
       </div>}
+      <div style={styles.mapProperty}>
+        {(property || windowWidth>=700) && <div style={styles.map}>
+          {isLoaded && <GoogleMap
+            mapContainerStyle={{width: '100%',height: '100%'}}
+            center={{lat:39.82874138954248, lng:-98.57956553069293}}
+            zoom={3}
+            options={{
+              styles: [
+                {
+                  featureType: 'poi',
+                  stylers: [{ visibility: 'off' }],
+                },
+                {
+                  featureType: 'transit',
+                  stylers: [{ visibility: 'off' }],
+                },
+                {
+                  featureType: 'landscape',
+                  stylers: [{ visibility: 'off' }],
+                }
+              ],
+              mapTypeControl: false,
+              fullscreenControl: false,
+              streetViewControl: false
+            }}
+          >
+            <MarkerF
+              icon={{
+                url: "https://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+              }}
+              position={property?{lat:property.latitude, lng:property.longitude}:null}
+            />
+          </GoogleMap>}
+        </div>}
+        {property && <div style={{...styles.column,height:windowWidth<700?'50%':'100%'}}>
+          <div style={styles.property}>
+            {windowWidth<700 && <div style={styles.backMobileBtn} onClick={()=>{
+              setProperty(null)
+            }}>Back</div>}
+            <b>{`(${property.yearBuilt}) `}</b>
+            {`${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`}
+            <div style={styles.inputRow}>
+              Occupied:
+              <div style={styles.occupancyRate}>
+                <input style={styles.input} placeholder={property.occupiedSpaceCount||0} onChange={(e)=>{setNewOccupiedSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newOccupiedSpaceCount}/>
+                <div>&nbsp;/&nbsp;</div>
+                <input style={styles.input} placeholder={property.totalSpaceCount||0} onChange={(e)=>{setNewTotalSpaceCount(e.target.value.replace(/[^0-9]/g, ""))}} value={newTotalSpaceCount}/>
+              </div>
+            </div>
+            <div style={styles.inputRow}>
+              # Parking:
+              <input style={styles.input} placeholder={property.parking||0} onChange={(e)=>{setNewParking(e.target.value.replace(/[^0-9]/g, ""))}} value={newParking}/>
+            </div>
+            <div style={styles.inputRow}>
+              # EV charger:
+              <input style={styles.input} placeholder={property.evCharger||0} onChange={(e)=>{setNewEvCharger(e.target.value.replace(/[^0-9]/g, ""))}} value={newEvCharger}/>
+            </div>
+            <div style={styles.inputRow}></div>
+            Redevelopment opportunities:
+            <textarea style={styles.textArea} placeholder={property.redevelopmentOpportunities} onChange={(e)=>{setNewRedevelopmentOpportunities(e.target.value)}} value={newRedevelopmentOpportunities}></textarea>
+            {
+              (newOccupiedSpaceCount || newTotalSpaceCount || newParking || newEvCharger || newRedevelopmentOpportunities)
+              && <div style={styles.updateBtn} onClick={()=>{update({
+                occupiedSpaceCount: parseInt(newOccupiedSpaceCount)||property.occupiedSpaceCount,
+                totalSpaceCount: parseInt(newTotalSpaceCount)||property.totalSpaceCount,
+                parking: parseInt(newParking)||property.parking,
+                evCharger: parseInt(newEvCharger)||property.evCharger,
+                redevelopmentOpportunities: newRedevelopmentOpportunities||property.redevelopmentOpportunities,
+                propertyAddress: property.propertyAddress,
+                city: property.city,
+                state: property.state,
+                zip: property.zip,
+                county: property.county,
+                yearBuilt:property.yearBuilt
+              })}}>Update</div>
+            }
+          </div>
+          <table style={styles.table}>
+            {Array(Math.min(censusData[0].length,censusData[1].length)).fill(0).map((i,index)=>(
+              <tr key={index}>
+                  <th style={styles.cell}>{censusData[0][index]}</th>
+                  <td style={styles.cell}>{censusData[1][index]}</td>
+              </tr>
+            ))}
+            {Math.min(censusData[0].length,censusData[1].length)===0 && <tr><td style={{textAlign:'center', height:'1in'}}>{`Census data ${loading?'loading...':'unavailable'}`}</td></tr>}
+          </table>
+        </div>}
+      </div>
     </div>
   );
 }
