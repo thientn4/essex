@@ -279,7 +279,7 @@ function App() {
             <div style={{height:'100%',display:'flex',flexDirection:'column',marginLeft:'0.1in', userSelect:'none',color:'white'}} onClick={()=>{
               setPickedDecade(decade[0])
               setPropertiesDisplay(properties.filter((property)=>
-                (decade[0]<=property.yearBuilt && property.yearBuilt<decade[0]+9)
+                (Math.floor(property.yearBuilt/10) === Math.floor(decade[0]/10))
               ))
             }}>
               <div style={{height:'100%',display:'flex',flexDirection:'column'}}>
