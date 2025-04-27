@@ -49,6 +49,7 @@ function App() {
       }
     }).then((response)=>{
       if(response.data.status==='success'){
+        setSearchValue("")
         properties=response.data.properties
         setPropertiesDisplay(properties)
         let decades={}
