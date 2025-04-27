@@ -6,7 +6,7 @@
 # ChatGPT/LLM chat transcripts
 I only use Google Search and no ChatGPT/LLM
 
-# Demo video:
+# Demo video (muted by default by GitHub, please unmute):
 This video demos core requirements for the application as requested, each requirement is demoed in the bullet-point order below:
 - Displays all core property information (from PROPERTY_LIST.csv) + additional property metadata (occupancy rate, number of parking lots, EV charger availability, redevelopment opportunities).
 - Allows users to select a property and fetches and displays 2023 US Census occupancy data
