@@ -4,7 +4,7 @@ const db=require('../db')
 const router=express.Router()
 
 router.post('/',(req,res,next)=>{
-    if (req.body.occupiedSpaceCount>req.body.totalSpaceCount) return res.status(500).send()
+    if (req.body.occupiedSpaceCount>req.body.totalSpaceCount) return res.status(400).send() ////// avoid invalid occupancy rate
     db.query(`
         UPDATE ESSEX.PROPERTIES
         SET 
