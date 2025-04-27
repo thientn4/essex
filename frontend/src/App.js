@@ -32,6 +32,7 @@ function App() {
   const [chartData,setChartData] = useState([])
   const [pickedDecade,setPickedDecade] = useState(null)
   const [loading,setLoading] = useState(false)
+  const [searchValue,setSearchValue] = useState("")
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: undefined
@@ -256,7 +257,9 @@ function App() {
         {!pickedDecade && <input
           style={styles.search}
           placeholder="search"
+          value={searchValue}
           onChange={(e)=>{
+            setSearchValue(e.target.value)
             if(e.target.value.length>0){  //-----------------> Search for properties based on their address and year built
               setPropertiesDisplay(properties.filter((property)=>
                 (`(${property.yearBuilt}) ${property.propertyAddress}, ${property.city}, ${property.county}, ${property.state}, ${property.zip}`)
