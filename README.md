@@ -3,6 +3,9 @@
 - Backend folder is in ExpressJS (NodeJS)
 - Database folder is in MySQL
 
+# ChatGPT/LLM chat transcripts
+I only use Google Search and no ChatGPT/LLM
+
 # Demo video:
 This video demos core requirements for the application as requested, each requirement is demoed in the bullet-point order below:
 - Displays all core property information (from PROPERTY_LIST.csv) + additional property metadata (occupancy rate, number of parking lots, EV charger availability, redevelopment opportunities).
