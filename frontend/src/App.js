@@ -33,10 +33,6 @@ function App() {
   const [pickedDecade,setPickedDecade] = useState(null)
   const [loading,setLoading] = useState(false)
   const [searchValue,setSearchValue] = useState("")
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: undefined
-  })
 
   //////////////////////////////////////////////////// FUNCTIONS //////////////////////////////////////////////////////
   const load = async ()=>{ //-----------------> Load all properties when page is opened
@@ -241,6 +237,10 @@ function App() {
   useEffect(() => { //-----------------> Load all properties when page is opened
     load()
   }, []);
+  const { isLoaded } = useJsApiLoader({ //-------------------> Setup Google Map
+    id: 'google-map-script',
+    googleMapsApiKey: undefined
+  })
   return (
     <div style={styles.page}>
       {(!property || windowWidth>=700) && <div style={styles.column}>
